@@ -39,6 +39,34 @@
 
     {{ partialCached "article/components/photoswipe" . }}
     {{ partial "article/components/mermaid" . }}
+
+    <!-- JSON-LD Article Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "{{ .Title }}",
+      "description": "{{ with .Params.description }}{{ . }}{{ else }}{{ with .Summary }}{{ . | truncate 160 }}{{ end }}{{ end }}",
+      "datePublished": "{{ .Date.Format "2006-01-02" }}",
+      "dateModified": "{{ .Lastmod.Format "2006-01-02" }}",
+      "author": {
+        "@type": "Organization",
+        "name": "{{ .Site.Params.metadata.author }}"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "{{ .Site.Params.metadata.publisher }}",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ .Site.BaseURL }}images/stackinsider-logo.png"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ .Permalink }}"
+      }
+    }
+    </script>
 {{ end }}
 
 {{ define "right-sidebar" }}
