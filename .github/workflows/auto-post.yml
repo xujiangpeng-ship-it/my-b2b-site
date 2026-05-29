@@ -2,7 +2,7 @@ name: Auto AI Post and Deploy
 
 on:
   schedule:
-    - cron: '0 0,2,4,6,8,10,12,14,16,18 * * *'   # 每天10篇，每2小时一次
+    - cron: '0 0,2,4,6,8,10,12,14,16,18 * * *'
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,8 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add content/posts/
+          # 使用 git add content/ 代替 content/posts/，避免目录不存在时报错
+          git add content/ || true
           git diff --staged --quiet || (git commit -m "Clean up posts" && git pull --rebase origin main && git push origin main)
 
       - name: Run AI article generator
@@ -40,11 +41,11 @@ jobs:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
         run: python generate.py
 
-      - name: Commit and push new post
+      - name: Commit and push new post AND index file
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add content/posts/ keyword_index.txt
+          git add content/posts/ keyword_index.txt || true
           git diff --staged --quiet || (
             git commit -m "Auto-generated post - $(date +%Y-%m-%d)" &&
             git pull --rebase origin main &&
