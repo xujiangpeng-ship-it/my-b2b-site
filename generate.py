@@ -200,6 +200,7 @@ for attempt in range(1, MAX_RETRIES + 1):
             timeout=TIMEOUT_SECONDS,
         )
         article_text = response.choices[0].message.content.strip()
+        print(f"📝 Raw API response length: {len(article_text)}")
         print("✅ API call succeeded.")
         break
     except Exception as e:
@@ -212,13 +213,33 @@ for attempt in range(1, MAX_RETRIES + 1):
             print("⛔ All retries exhausted. Exiting.")
             exit(1)
 
-# ========== 清理异常输出 ==========
-article_text = re.sub(r'^```[a-z]*\s*[\s\S]*?```\s*', '', article_text, flags=re.DOTALL)
+# ========== 清理异常输出（修复代码块问题）==========
+if article_text.startswith('```'):
+    # 提取代码块内部内容
+    first_block_end = article_text.find('\n', article_text.find('```') + 3)
+    if first_block_end != -1:
+        last_block_start = article_text.rfind('```')
+        if last_block_start > first_block_end:
+            article_text = article_text[first_block_end+1:last_block_start].strip()
+        else:
+            article_text = article_text[first_block_end+1:].strip()
+    else:
+        article_text = article_text[3:].strip()
+
+# 其他清理
 article_text = re.sub(r'^CITATION FORMAT.*?(\n\n|$)', '', article_text, flags=re.IGNORECASE)
 article_text = re.sub(r'^TOOLS[\s\S]*?(\n\n|$)', '', article_text, flags=re.IGNORECASE)
 article_text = re.sub(r'^<[^>]+>.*?(\n\n|$)', '', article_text, flags=re.IGNORECASE)
-article_text = re.sub(r'^# .+\n\n?', '', article_text)  # 去除可能重复的标题
+article_text = re.sub(r'^# .+\n\n?', '', article_text, count=1)
 article_text = article_text.lstrip()
+
+print(f"📝 Cleaned article length: {len(article_text)}")
+
+# 安全检查
+if len(article_text) < 200:
+    print(f"⚠️ Article body too short ({len(article_text)} chars). Raw text preview: {article_text[:200]}")
+    print("⛔ Skipping this generation. Check API response or Prompt.")
+    exit(1)
 
 # ========== 兜底元数据 ==========
 if not article_text.startswith('---'):
