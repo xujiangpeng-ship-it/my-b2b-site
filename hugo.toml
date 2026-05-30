@@ -20,7 +20,7 @@ copyright = "© 2026 Stack Insider"
   [params.sidebar]
     emoji = "®️"
     subtitle = "Expert software reviews & smarter stack decisions"
-    avatar = "/images/stackinsider-logo.svg"
+    avatar = "/images/stackinsider-logo.png"
 
   # 文章列表日期格式
   [params.article]
