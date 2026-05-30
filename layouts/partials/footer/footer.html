@@ -1,0 +1,12 @@
+<footer class="site-footer">
+    <section class="copyright">
+        &copy; {{ now.Format "2006" }} {{ .Site.Copyright | default .Site.Title }}
+    </section>
+    {{ if .Site.Params.footer.custom -}}
+    <section class="powerby">
+        {{- range .Site.Params.footer.custom }}
+            <a href="{{ .url }}">{{ .title }}</a> &middot;
+        {{- end }}
+    </section>
+    {{- end }}
+</footer>
